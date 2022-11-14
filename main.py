@@ -42,9 +42,14 @@ def playHand():  # plays a round of blackjack
         print("You have", money, "dollars remaining")
         # Player Actions
         displayHands(playerHand, houseHand)
+        naturalCheckDealer(houseHand)
+        if cardCheck(playerHand) == 21:
+            print("Blackjack!")
+            money += bet * 2.5
+            playing = False
         while cardCheck(playerHand) < 21 and playing:
             print("hit(a), stand(s), double down(d), or surrender(f)")
-            print(cardsPlayed)
+            print(cardsPlayed, "cards played")
             userInput = input("Enter a, d, or s: ")
             if userInput == "a" or userInput == "s" or userInput == "d" or userInput == "f":
                 match userInput:
@@ -52,10 +57,18 @@ def playHand():  # plays a round of blackjack
                         print("Adding card")
                         cardsPlayed += 1
                         playerHand.append(sum(deck[0:1]))
+                        deck.extend(deck[0:1])
+                        deck = deck[1:len(deck)]
                         displayHands(playerHand, houseHand)
+                        cardsPlayed += 1
+
                         while cardCheck(playerHand) < 21 and playing:
                             print("hit(a) or stand(s)")
                             userInput = input("Enter a or s: ")
+                            if cardCheck(playerHand) == 21:
+                                print("Blackjack!")
+                                money += bet * 2.5
+                                playing = False
                             if userInput == "a":
                                 playerHand.append(sum(deck[0:1]))
                                 deck.extend(deck[0:1])
@@ -63,23 +76,44 @@ def playHand():  # plays a round of blackjack
                                 displayHands(playerHand, houseHand)
                                 cardsPlayed += 1
                             elif userInput == "s":
-                                dealerTurn(playerHand, houseHand)
+                                dealerTurn(houseHand)
                                 compareCards(playerHand, houseHand)
                             else:
                                 userInput = input("Invalid")
                     case "d":
                         print("Doubling down")
-                        money -= bet
-                        bet += bet
-                        print("You have", money, "dollars remaining")
-                        playerHand.append(deck[0:1])
-                        deck.extend(deck[0:1])
-                        deck = deck[1:len(deck)]
-                        dealerTurn(playerHand, houseHand)
-                        cardsPlayed += 1
-                        compareCards(playerHand, houseHand)
+                        if money < bet:
+                            print("You are broke and cannot bet anymore. Cancelling bet")
+                            print("hit(a) or stand(s)")
+                            userInput = input("Enter a or s: ")
+                            if cardCheck(playerHand) == 21:
+                                print("Blackjack!")
+                                money += bet * 2.5
+                                playing = False
+                            if userInput == "a":
+                                playerHand.append(sum(deck[0:1]))
+                                deck.extend(deck[0:1])
+                                deck = deck[1:len(deck)]
+                                displayHands(playerHand, houseHand)
+                                cardsPlayed += 1
+                            elif userInput == "s":
+                                dealerTurn(houseHand)
+                                compareCards(playerHand, houseHand)
+                            else:
+                                userInput = input("Invalid")
+                        else:
+                            money -= bet
+                            bet += bet
+                            print("You have", money, "dollars remaining")
+                            playerHand.append(deck[0:1])
+                            deck.extend(deck[0:1])
+                            deck = deck[1:len(deck)]
+                            dealerTurn(houseHand)
+                            cardsPlayed += 1
+                            compareCards(playerHand, houseHand)
                     case "s":
                         print("Standing")
+                        dealerTurn(houseHand)
                         compareCards(playerHand, houseHand)
                     case "f":
                         print("Coward")
@@ -89,11 +123,7 @@ def playHand():  # plays a round of blackjack
                         break
             else:
                 userInput = input("Invalid. Enter a, s, d, or f: ")
-        if cardCheck(playerHand) == 21:
-            print("Blackjack!")
-            money += bet * 2.5
-            playing = False
-        elif cardCheck(playerHand) > 21:
+        if cardCheck(playerHand) > 21:
             print("Bust! :(")
             bet = 0
             playing = False
@@ -101,11 +131,13 @@ def playHand():  # plays a round of blackjack
             shuffle()
             print("shuffling")
 
+
 def startGame():  # starts the game
     print("Starting the game! Dealer stands on 17 or higher. Blackjack pays 1.5x")
     userInput = input("Enter starting money: ")
     global money
     money = int(userInput)
+
 
 def displayHands(phand, dhand):  # displays hand info
     displayPlayerHand = str(phand)
@@ -113,6 +145,7 @@ def displayHands(phand, dhand):  # displays hand info
     print("Your hand is ", displayPlayerHand[1:len(displayPlayerHand) - 1])
     print("Your total:", cardCheck(phand))
     sys.stdout.write('The house hand is ' + displayHouseHand + ', ?\n')
+
 
 def cardCheck(hand):
     testHand = hand
@@ -139,6 +172,7 @@ def cardCheck(hand):
     else:
         return sum(testHand)
 
+
 def compareCards(phand, dhand):
     global money
     global bet
@@ -156,22 +190,51 @@ def compareCards(phand, dhand):
         bet = 0
         playing = False
 
-def dealerTurn(phand, dhand):
+
+def dealerTurn(dhand):
     global deck
-    while cardCheck(dhand)<17:
+    displayHouseHand = str(dhand)
+    while cardCheck(dhand) < 17:
         dhand.append(sum(deck[0:1]))
         deck.extend(deck[0:1])
         deck = deck[1:len(deck)]
-    displayHands(phand, dhand)
+    print("The dealers hand is", displayHouseHand[1:len(displayHouseHand) - 1])
+
+
+def naturalCheckDealer(dhand):
+    global bet
+    global playing
+    if cardCheck(dhand) == 21:
+        print("Dealer has blackjack. You lose")
+        bet = 0
+        playing = False
+
+
+class aiPlayer:
+    aiHand = []
+    def __init__(self, name):
+        self.name = name
+    def aihanddeal(self):
+        global deck
+        aiHand = deck[0:2]
+        deck.extend(deck[0:2])
+        deck = deck[2:len(deck)]
+        displayaiHand = str(aiHand)
+        print(self.name, "has the hand", displayaiHand[1:len(displayaiHand) - 1])
+
 
 bet = 0
 money = 0
 playing = True
 cardsPlayed = 0
 percentDeckShuffle = 0
+names = []
+with open('names.txt', encoding='utf-8') as f:  # inputs names from names.txt into list
+    for x in range(18000):
+        names.append(f.readline().strip('\n'))
 userInput = input("Enter amount of decks: ")
 amountDecks = int(userInput)
-while True:
+while True:  # gets percentage to shuffle the deck at
     userInput = input("Enter percent to shuffle deck at in decimal form: ")
     percentDeckShuffle = float(userInput)
     if percentDeckShuffle < .2:
@@ -180,6 +243,21 @@ while True:
         print("Must be .2 or greater")
     elif percentDeckShuffle >= .2:
         break
+while True:  # generates ai players
+    userInput = input("Input number of AI players: ")
+    playercount = int(userInput)
+    if playercount < 0:
+        print("Player count cannot be lower than 0")
+        userInput = input("Input number of AI players: ")
+        playercount = int(userInput)
+    else:
+        playerNamesNum = []
+        for x in range(playercount):
+            print(names[x], "is playing")
+            playerNamesNum.append('player' + str(x))
+            playerNamesNum[x] = aiPlayer(names[x])
+    break
+
 deck = list(range(1, 14)) * (amountDecks * 4)
 shuffle()
 startGame()
