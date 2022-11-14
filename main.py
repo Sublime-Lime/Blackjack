@@ -15,7 +15,7 @@ def playHand():  # plays a round of blackjack
     global percentDeckShuffle
     global cardsPlayed
     playing = True
-    print(int(float(len(deck)) * percentDeckShuffle))
+    # print("shuffling every", int(float(len(deck)) * percentDeckShuffle), "cards")
     while playing:
         # deals cards
         # print(deck)
@@ -63,6 +63,7 @@ def playHand():  # plays a round of blackjack
                                 displayHands(playerHand, houseHand)
                                 cardsPlayed += 1
                             elif userInput == "s":
+                                dealerTurn(playerHand, houseHand)
                                 compareCards(playerHand, houseHand)
                             else:
                                 userInput = input("Invalid")
@@ -74,8 +75,9 @@ def playHand():  # plays a round of blackjack
                         playerHand.append(deck[0:1])
                         deck.extend(deck[0:1])
                         deck = deck[1:len(deck)]
-                        displayHands(playerHand, houseHand)
+                        dealerTurn(playerHand, houseHand)
                         cardsPlayed += 1
+                        compareCards(playerHand, houseHand)
                     case "s":
                         print("Standing")
                         compareCards(playerHand, houseHand)
@@ -160,7 +162,7 @@ def dealerTurn(phand, dhand):
         dhand.append(sum(deck[0:1]))
         deck.extend(deck[0:1])
         deck = deck[1:len(deck)]
-        displayHands(phand, dhand)
+    displayHands(phand, dhand)
 
 bet = 0
 money = 0
