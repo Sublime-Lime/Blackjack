@@ -1,5 +1,5 @@
 import random
-import pandas as pd
+import csv
 
 
 class blackjack:
@@ -304,24 +304,42 @@ class AIPlayer:
             self.bet = 0
 
     def AITurn(self):
-        AIhard = pd.read_csv('npchard.csv')
-        AIsoft = pd.read_csv('npcsoft.csv')
-        AIpair = pd.read_csv('npcpair.csv')
         self.cardCheck()
         self.AIBet()
+        move = ""
         while self.mohsScale:
-            print(self.cardCheck(), str(blackjack.NPCintegration()))
-            move = AIhard.loc[str(self.cardCheck()), str(blackjack.NPCintegration())]
+            with open('npchard.csv') as AIhard:
+                csvreader = csv.reader(AIhard)
+                firstrow = next(csvreader)
+                for row in csvreader:
+                    if row[0] == str(self.cardCheck()):
+                        break
+                for x in range(0, len(firstrow)):
+                    if firstrow[x] == str(blackjack.NPCintegration()):
+                        break
+                move = row[x]
             if move == "H":
-                self.AIHand.append(blackjack.deck[0:1])
+                print(self.name, "hit")
+                self.AIHand.append(sum(blackjack.deck[0:1]))
                 blackjack.deck.extend(blackjack.deck[0:1])
                 blackjack.deck = blackjack.deck[1:len(blackjack.deck)]
             elif move == "S":
                 break
         while not self.mohsScale:
-            move = AIsoft.loc[str(self.cardCheck()), str(blackjack.NPCintegration())]
+            with open('npcsoft.csv') as AIsoft:
+                csvreader = csv.reader(AIsoft)
+                firstrow = next(csvreader)
+                for row in csvreader:
+                    if row[0] == str(self.cardCheck()):
+                        break
+                for x in range(0, len(firstrow)):
+                    if firstrow[x] == str(blackjack.NPCintegration()):
+                        break
+                move = row[x]
+                print(move)
             if move == "H":
-                self.AIHand.append(blackjack.deck[0:1])
+                print(self.name, "hit")
+                self.AIHand.append(sum(blackjack.deck[0:1]))
                 blackjack.deck.extend(blackjack.deck[0:1])
                 blackjack.deck = blackjack.deck[1:len(blackjack.deck)]
             elif move == "S":
